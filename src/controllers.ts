@@ -2,26 +2,33 @@ import { ContactsCollection, Contact } from "./models";
 
 export class ContactsControllerOptions {
   action: "get" | "save";
-  params: Contact;
+  params: Partial<Contact>; 
 }
 
 class ContactsController {
   contacts: ContactsCollection;
+  promesa : Promise<any>;
+
   constructor() {
     this.contacts = new ContactsCollection();
-    this.contacts.load();
+    const promesa = this.contacts.loadContacts();
+     this.promesa = promesa;
   }
-  processOptions(options: ContactsControllerOptions) {
-    var resultado;
-    if (options.action == "get" && options.params.id) {
+    
+  async processOptions(options: ContactsControllerOptions) {
+    let resultado;
+    if (options.action === "get" && options.params?.id !== undefined) {
       resultado = this.contacts.getOneById(options.params.id);
-    } else if (options.action == "get") {
+    } else if (options.action === "get") {
       resultado = this.contacts.getAll();
-    } else if (options.action == "save" && options.params) {
-      this.contacts.addOne(options.params);
-      this.contacts.save();
+    } else if (options.action === "save" && options.params) {
+      this.contacts.addOne(options.params as Contact); // asumiendo que aquí tienes un Contact válido
+      await this.contacts.save();
     }
     return resultado;
   }
+  
 }
+
+
 export { ContactsController };
